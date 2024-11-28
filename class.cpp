@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <cstdlib>
 #include <sstream>
+#include <utility>
 
 //constructors
 BigInt::BigInt() {value = "0"; sign = true;}           //defolt constructor
@@ -17,7 +18,7 @@ BigInt::BigInt(bool insign, std::string str) {     //bool + string
     }
     if (value == "0") sign = true;
 }
-BigInt::BigInt(std::string& str) {                  //string constructor
+BigInt::BigInt(std::string str) {                  //string constructor
     sign = str[0] == '-' ? false : true;
     value = sign ? str : str.substr(1);
 }
@@ -120,6 +121,7 @@ std::string stringMultiply(const std::string& adin, const std::string& dva){    
     return result;
 }
 bool firstBigger(const std::string& adin, const std::string& dva){     //compare abs values
+    
     if(adin.length() > dva.length()) return true;
     if(adin.length() < dva.length()) return false;
     for (int i = 0; i < int(adin.length()); ++i){
@@ -128,67 +130,38 @@ bool firstBigger(const std::string& adin, const std::string& dva){     //compare
     }
     return true;
 }
-void BigInt::removeZeros(){
-    while (value[0] == '0')
-        value.erase(value.begin());
-}
-std::string quotientDivision(const std::string& dividend, const std::string& divisor){ //return quotient
-    size_t divsize = divisor.length();
-    std::string dim = dividend.substr(0, divsize);
-    std::string rem;
-    std::string quotient = "";
-    int p = divsize;
-    std::string sub[10];
-    sub[1] = divisor;
-    if (divisor == dividend) return "1";
-    if (firstBigger(dividend, divisor) == false) return "0";
-    while(p != dividend.length() || divsize == dividend.length()){
-   
-        while(firstBigger(sub[1], dim)){
-            if (p != dividend.length()){
-                quotient += '0';
-                dim += dividend[p++];
-            } else {
-                rem = dim;
-                return quotient;
-            }
-        }
-        for (int i = 2; i < 10; i++){
-            if (sub[i] == "") sub[i] = stringSum(sub[i-1], divisor);
-            if (firstBigger(sub[i], dim)){
-                rem = stringDif(dim, (sub[i] == dim ? sub[i] : sub[--i]));
-                rem = (rem == "0" ? "" : rem);
-                quotient += (i + '0');
-                break;
-            }
-        }
-
-        dim = rem;
-    }
-    return quotient;
-}
-std::string remainderDivision(const std::string& dividend, const std::string& divisor){ //return remainder
+std::pair<std::string, std::string> stringDivision(const std::string& dividend, const std::string& divisor){ //return remainder
+    std::pair<std::string, std::string> ans;
     const size_t divsize = divisor.length();
     std::string dim = dividend.substr(0, divsize);
-    std::string rem;
-    std::string quotient = "";
+    std::string quotient = "", rem;
     int p = divsize;
-    std::string sub[10];
+    std::string sub[11];
     sub[1] = divisor;
-    if (divisor == dividend) return "0";
-    if (firstBigger(dividend, divisor) == false) return dividend;
+
+    if(divisor == "0"){
+        std::cerr << "ERROR: Division by zero\n";
+        exit(EXIT_FAILURE);
+    }
+    if (divisor == dividend) return std::make_pair("1", "0");
+    if (firstBigger(dividend, divisor) == false) return std::make_pair("0", dividend);
+
     while(p != dividend.length() || divsize == dividend.length()){
-        std::cout << "      " << dim << ' ' << rem << '\n';
-        while(firstBigger(sub[1], dim)){
+        
+        bool addZero = false;
+        while(firstBigger(sub[1], dim) && sub[1] != dim){
+            if (addZero) quotient += '0';
             if (p != dividend.length()){
-                quotient += '0';
-                dim += dividend[p++];
+                addZero = true;
+                if(dim != "0") dim += dividend[p];
+                else dim = (dividend[p] == '0' ? "" : dim = dividend[p]);
+                p++;
             } else {
-                rem = dim;
-                return (rem == "" ? "0" : rem);
+                return std::make_pair(quotient, (dim == "" ? "0" : dim));
             }
         }
-        for (int i = 2; i < 10; i++){
+        
+        for (int i = 2; i <= 10; i++){
             if (sub[i] == "") sub[i] = stringSum(sub[i-1], divisor);
             if (firstBigger(sub[i], dim)){
                 rem = stringDif(dim, (sub[i] == dim ? sub[i] : sub[--i]));
@@ -198,9 +171,10 @@ std::string remainderDivision(const std::string& dividend, const std::string& di
             }
         }
 
+       // std::cout << "\ntest:  " << dim << ' ' << p << ' ' << quotient << ' ' << rem << '\n';
         dim = rem;
     }
-    return (rem == "" ? "0" : rem) ;
+    return std::make_pair(quotient, (rem == "" ? "0" : rem));
 }
 
 //get set function
@@ -283,17 +257,16 @@ BigInt operator*(const BigInt& left, const BigInt& right) {
 }
 BigInt operator/(const BigInt& left, const BigInt& right) {
         if (left.sign == right.sign)
-        return BigInt(true, quotientDivision(left.value, right.value));
+        return BigInt(true, stringDivision(left.value, right.value).first);
     else
-        return BigInt(false, quotientDivision(left.value, right.value));
+        return BigInt(false, stringDivision(left.value, right.value).first);
 }
 BigInt operator%(const BigInt& left, const BigInt& right) {
         if (left.sign)
-        return BigInt(true, remainderDivision(left.value, right.value));
+        return BigInt(true, stringDivision(left.value, right.value).second);
     else
-        return BigInt(false, remainderDivision(left.value, right.value));
+        return BigInt(false, stringDivision(left.value, right.value).second);
 }
-
 BigInt BigInt::operator-(){                         //unary minus
     BigInt a;
     a.value = value;

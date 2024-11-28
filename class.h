@@ -10,14 +10,13 @@ class BigInt{
     private:
         std::string value; 
         bool sign;
-        void removeZeros();
         
     public:
     //constructors
         BigInt(); 
         ~BigInt();
         BigInt(bool sign, std::string str);
-        BigInt(std::string& str);
+        BigInt(std::string str);
         BigInt(const char* str);
         BigInt(int num);
         BigInt(short num);
@@ -120,8 +119,8 @@ BigInt operator%(int left, const BigInt& right);
 std::string stringDif(const std::string& big, const std::string& small);
 std::string stringSum(const std::string& adin, const std::string& dva);
 std::string stringMultiply(const std::string& adin, const std::string& dva);
-std::string quotientDivision(const std::string& dividend, const std::string& divisor);
-std::string remainderDivision(const std::string& dividend, const std::string& divisor);
+std::pair<std::string, std::string> stringDivision(const std::string& dividend, const std::string& divisor);
 bool firstBigger(const std::string& adin, const std::string& dva);
+
 
 #endif
