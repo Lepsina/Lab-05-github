@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <typeinfo>
+
 #include "class.h"
 void f(BigInt n){}
 int main(){

@@ -130,12 +130,12 @@ bool firstBigger(const std::string& adin, const std::string& dva){     //compare
     }
     return true;
 }
-std::pair<std::string, std::string> stringDivision(const std::string& dividend, const std::string& divisor){ //return remainder
+std::pair<std::string, std::string> stringDivision(const std::string& dividend, const std::string& divisor){ 
     std::pair<std::string, std::string> ans;
     const size_t divsize = divisor.length();
     std::string dim = dividend.substr(0, divsize);
     std::string quotient = "", rem;
-    int p = divsize;
+    size_t p = divsize;
     std::string sub[11];
     sub[1] = divisor;
 
@@ -170,8 +170,6 @@ std::pair<std::string, std::string> stringDivision(const std::string& dividend, 
                 break;
             }
         }
-
-       // std::cout << "\ntest:  " << dim << ' ' << p << ' ' << quotient << ' ' << rem << '\n';
         dim = rem;
     }
     return std::make_pair(quotient, (rem == "" ? "0" : rem));
